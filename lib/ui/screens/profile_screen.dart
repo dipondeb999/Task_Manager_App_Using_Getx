@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:task_manager_app_using_getx/data/models/network_response.dart';
-import 'package:task_manager_app_using_getx/data/models/user_model.dart';
-import 'package:task_manager_app_using_getx/data/services/network_caller.dart';
-import 'package:task_manager_app_using_getx/data/utils/urls.dart';
 import 'package:task_manager_app_using_getx/ui/controllers/auth_controller.dart';
+import 'package:task_manager_app_using_getx/ui/controllers/profile_controller.dart';
 import 'package:task_manager_app_using_getx/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager_app_using_getx/ui/widgets/snack_bar_message.dart';
 import 'package:task_manager_app_using_getx/ui/widgets/task_manager_app_bar.dart';
@@ -18,7 +15,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool _updateProfileInProgress = false;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -27,6 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _lastNameTEController = TextEditingController();
   final TextEditingController _phoneTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
+  final ProfileController _profileController = Get.find<ProfileController>();
 
   XFile? _selectedImage;
 
@@ -198,13 +195,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          Visibility(
-            visible: !_updateProfileInProgress,
-            replacement: const CenteredCircularProgressIndicator(),
-            child: ElevatedButton(
-              onPressed: _onTapUpdateButton,
-              child: const Icon(Icons.arrow_circle_right_outlined),
-            ),
+          GetBuilder<ProfileController>(
+            builder: (controller) {
+              return Visibility(
+                visible: !controller.inProgress,
+                replacement: const CenteredCircularProgressIndicator(),
+                child: ElevatedButton(
+                  onPressed: _onTapUpdateButton,
+                  child: const Icon(Icons.arrow_circle_right_outlined),
+                ),
+              );
+            }
           ),
         ],
       ),
@@ -218,45 +219,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _updatedProfile() async {
-
-    _updateProfileInProgress = true;
-    setState(() {});
-
-    Map<String, dynamic> requestBody = {
-      "email": _emailTEController.text.trim(),
-      "firstName": _firstNameTEController.text.trim(),
-      "lastName": _lastNameTEController.text.trim(),
-      "mobile": _phoneTEController.text.trim(),
-    };
-
-    if (_passwordTEController.text.isNotEmpty) {
-      requestBody['password'] = _passwordTEController.text;
-    }
-
-    if (_selectedImage != null) {
-      List<int> imageBytes = await _selectedImage!.readAsBytes();
-      String convertedImage = base64Encode(imageBytes);
-      requestBody['photo'] = convertedImage;
-    }
-
-    final NetworkResponse response = await NetworkCaller.postRequest(
-        url: Urls.updateProfile,
-      body: requestBody,
+    final bool result = await _profileController.profileUpdate(
+        _emailTEController.text.trim(),
+        _firstNameTEController.text.trim(),
+        _lastNameTEController.text.trim(),
+        _phoneTEController.text.trim(),
+        _passwordTEController.text,
     );
 
-    _updateProfileInProgress = false;
-    setState(() {});
-
-    if (response.isSuccess) {
-      UserModel userModel = UserModel.fromJson(requestBody);
-      AuthController.saveUserData(userModel);
-      if (mounted) {
+    if (result) {
         showSnackBarMessage(context, 'Profile has been updated!');
-      }
     } else {
-      if (mounted) {
-        showSnackBarMessage(context, response.errorMessage);
-      }
+        showSnackBarMessage(context, _profileController.errorMessage!, true);
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:task_manager_app_using_getx/ui/controllers/auth_controller.dart';
 import 'package:task_manager_app_using_getx/ui/screens/main_bottom_nav_bar_screen.dart';
 import 'package:task_manager_app_using_getx/ui/screens/sign_in_screen.dart';
@@ -27,19 +28,9 @@ class _SplashScreenState extends State<SplashScreen> {
     await AuthController.getAccessToken();
     if (AuthController.isLoggedIn()) {
       await AuthController.getUserData();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const MainBottomNavBarScreen(),
-        ),
-      );
+      Get.offNamed(MainBottomNavBarScreen.name);
     }else{
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const SignInScreen(),
-        ),
-      );
+      Get.offNamed(SignInScreen.name);
     }
   }
 

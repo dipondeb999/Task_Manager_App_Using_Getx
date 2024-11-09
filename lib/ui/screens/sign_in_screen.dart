@@ -13,6 +13,8 @@ import 'package:task_manager_app_using_getx/ui/widgets/snack_bar_message.dart';
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
+  static const String name = '/signInScreen';
+
   @override
   State<SignInScreen> createState() => _SignInScreenState();
 }

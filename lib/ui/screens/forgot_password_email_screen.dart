@@ -1,8 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager_app_using_getx/data/models/network_response.dart';
-import 'package:task_manager_app_using_getx/data/services/network_caller.dart';
-import 'package:task_manager_app_using_getx/data/utils/urls.dart';
+import 'package:get/get.dart';
+import 'package:task_manager_app_using_getx/ui/controllers/forgot_password_email_controller.dart';
 import 'package:task_manager_app_using_getx/ui/screens/forgot_password_otp_screen.dart';
 import 'package:task_manager_app_using_getx/ui/utils/app_colors.dart';
 import 'package:task_manager_app_using_getx/ui/widgets/centered_circular_progress_indicator.dart';
@@ -12,16 +11,19 @@ import 'package:task_manager_app_using_getx/ui/widgets/snack_bar_message.dart';
 class ForgotPasswordEmailScreen extends StatefulWidget {
   const ForgotPasswordEmailScreen({super.key});
 
-  static const String name = '/forgotPasswordEmail';
+  static const String name = '/forgotPasswordEmailScreen';
 
   @override
   State<ForgotPasswordEmailScreen> createState() => _ForgotPasswordEmailScreenState();
 }
 
 class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
-  bool _forgetPasswordEmailInProgress = false;
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailTEController = TextEditingController();
+
+  final ForgotPasswordEmailController _forgotPasswordEmailController = Get.find<ForgotPasswordEmailController>();
+
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
@@ -76,13 +78,17 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
             },
           ),
           const SizedBox(height: 24),
-          Visibility(
-            visible: !_forgetPasswordEmailInProgress,
-            replacement: const CenteredCircularProgressIndicator(),
-            child: ElevatedButton(
-              onPressed: _onTapNextButton,
-              child: const Icon(Icons.arrow_circle_right_outlined),
-            ),
+          GetBuilder<ForgotPasswordEmailController>(
+            builder: (controller) {
+              return Visibility(
+                visible: !controller.inProgress,
+                replacement: const CenteredCircularProgressIndicator(),
+                child: ElevatedButton(
+                  onPressed: _onTapNextButton,
+                  child: const Icon(Icons.arrow_circle_right_outlined),
+                ),
+              );
+            }
           ),
         ],
       ),
@@ -117,33 +123,22 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    _recoverVerifyEmail(_emailTEController.text);
+    _recoverVerifyEmail();
   }
 
-  Future<void> _recoverVerifyEmail(String email) async {
-    _forgetPasswordEmailInProgress = true;
-    setState(() {});
+  Future<void> _recoverVerifyEmail() async {
+    final bool result = await _forgotPasswordEmailController.recoverVerifyEmail(_emailTEController.text);
 
-    final NetworkResponse response = await NetworkCaller.getRequest(url: Urls.verifyEmail(email));
-
-    _forgetPasswordEmailInProgress = false;
-    setState(() {});
-
-    if (response.isSuccess) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ForgotPasswordOTPScreen(email: email),
-        ),
-      );
+    if (result) {
       showSnackBarMessage(context, 'A 6 digit OTP code sent to your email.');
+      Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPasswordOTPScreen(email: _emailTEController.text)));
     }else{
-      showSnackBarMessage(context, response.errorMessage, true);
+      showSnackBarMessage(context, _forgotPasswordEmailController.errorMessage!, true);
     }
   }
 
   void _onTapSignUpButton() {
-    Navigator.pop(context);
+    Get.back();
   }
 
   @override

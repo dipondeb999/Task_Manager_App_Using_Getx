@@ -8,7 +8,7 @@ import 'package:task_manager_app_using_getx/ui/widgets/task_manager_app_bar.dart
 class MainBottomNavBarScreen extends StatefulWidget {
   const MainBottomNavBarScreen({super.key});
 
-  static const String name = '/home';
+  static const String name = '/homeScreen';
 
   @override
   State<MainBottomNavBarScreen> createState() => _MainBottomNavBarScreenState();
