@@ -9,7 +9,9 @@ class LoginModel {
 
   LoginModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
-    data = json['data'] != null ? UserModel.fromJson(json['data']) : null;
+    if (json['data'] != null) {
+      data = UserModel.fromJson(json['data']);
+    }
     token = json['token'];
   }
 }
