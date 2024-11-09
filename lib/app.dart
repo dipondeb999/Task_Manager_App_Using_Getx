@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:task_manager_app_using_getx/controller_binder.dart';
+import 'package:task_manager_app_using_getx/ui/controllers/sign_in_controller.dart';
 import 'package:task_manager_app_using_getx/ui/screens/forgot_password_email_screen.dart';
 import 'package:task_manager_app_using_getx/ui/screens/main_bottom_nav_bar_screen.dart';
 import 'package:task_manager_app_using_getx/ui/screens/sign_in_screen.dart';
@@ -34,6 +35,8 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
       routes: {
         SplashScreen.name: (context) => const SplashScreen(),
         MainBottomNavBarScreen.name: (context) => const MainBottomNavBarScreen(),
+        ForgotPasswordEmailScreen.name: (context) => const ForgotPasswordEmailScreen(),
+        SignUpScreen.name: (context) => const SignUpScreen(),
       },
     );
   }
